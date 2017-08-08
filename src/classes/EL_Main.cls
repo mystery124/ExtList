@@ -5,20 +5,32 @@
 public with sharing class EL_Main {
 
     public static List<String> sort(List<String> strings){
+        String comparableTypeName = 'EL_Main.StringComparable';
+        List<ItemWrapper> items = wrapAndSortList(strings, comparableTypeName);
+        List<Object> sortedObjects = extractList(items);
+        List<Object> sortedStrings = new List<String>();
+        sortedStrings.addAll(sortedObjects);
+        return (List<String>) sortedStrings;
+    }
 
+    private static List<ItemWrapper> wrapAndSortList(List<Object> objects, String comparableTypeName){
         List<ItemWrapper> itemWrappers = new List<ItemWrapper>();
-        for(String str : strings){
-            ItemWrapper item = new StringComparable();
-            item.setItem(str);
+        for(Object obj : objects){
+            Type comparableType = Type.forName(comparableTypeName);
+            ItemWrapper item = (ItemWrapper) comparableType.newInstance();
+            item.setItem(obj);
             itemWrappers.add(item);
         }
         itemWrappers.sort();
+        return itemWrappers;
+    }
 
-        List<String> sortedStrings = new List<String>();
+    private static List<Object> extractList(List<ItemWrapper> itemWrappers){
+        List<Object> sortedValues = new List<Object>();
         for(ItemWrapper item : itemWrappers){
-            sortedStrings.add((String)item.getItem());
+            sortedValues.add(item.getItem());
         }
-        return sortedStrings;
+        return sortedValues;
     }
 
     interface ItemWrapper {
