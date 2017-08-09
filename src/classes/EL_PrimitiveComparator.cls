@@ -3,40 +3,81 @@
  */
 
 public class EL_PrimitiveComparator {
+
+    private static Integer compareNulls(Object a, Object b){
+        if(a == null && b == null){
+            return 0;
+        } else if(a == null){
+            return 1;
+        } else {
+            return -1;
+        }
+    }
+
     public static Integer compareAtoB(String a, String b){
-        return a.compareTo(b);
+        if(a == null || b == null){
+            return compareNulls(a, b);
+        } else {
+            return a.compareTo(b);
+        }
     }
 
     public static Integer compareAtoB(Date a, Date b){
-        return a > b ? 1 : (a < b ? -1 : 0);
+        if(a == null || b == null){
+            return compareNulls(a, b);
+        } else {
+            return a > b ? 1 : (a < b ? -1 : 0);
+        }
     }
 
     public static Integer compareAtoB(Datetime a, Datetime b){
-        return a > b ? 1 : (a < b ? -1 : 0);
-    }
+        if(a == null || b == null){
+            return compareNulls(a, b);
+        } else {
+            return a > b ? 1 : (a < b ? -1 : 0);
+        }    }
 
     public static Integer compareAtoB(Time a, Time b){
-        return a > b ? 1 : (a < b ? -1 : 0);
-    }
+        if(a == null || b == null){
+            return compareNulls(a, b);
+        } else {
+            return a > b ? 1 : (a < b ? -1 : 0);
+        }    }
 
     public static Integer compareAtoB(Integer a, Integer b){
-        return a > b ? 1 : (a < b ? -1 : 0);
-    }
+        if(a == null || b == null){
+            return compareNulls(a, b);
+        } else {
+            return a > b ? 1 : (a < b ? -1 : 0);
+        }    }
 
     public static Integer compareAtoB(Decimal a, Decimal b){
-        return a > b ? 1 : (a < b ? -1 : 0);
-    }
+        if(a == null || b == null){
+            return compareNulls(a, b);
+        } else {
+            return a > b ? 1 : (a < b ? -1 : 0);
+        }    }
 
     public static Integer compareAtoB(Double a, Double b){
-        return a > b ? 1 : (a < b ? -1 : 0);
-    }
+        if(a == null || b == null){
+            return compareNulls(a, b);
+        } else {
+            return a > b ? 1 : (a < b ? -1 : 0);
+        }    }
 
     public static Integer compareAtoB(Long a, Long b){
-        return a > b ? 1 : (a < b ? -1 : 0);
-    }
+        if(a == null || b == null){
+            return compareNulls(a, b);
+        } else {
+            return a > b ? 1 : (a < b ? -1 : 0);
+        }    }
 
     public static Integer compareAtoB(Boolean a, Boolean b){
-        return a == b ? 0 : (a == true ? 1 : -1);
+        if(a == null || b == null){
+            return compareNulls(a, b);
+        } else {
+            return a == b ? 0 : (a == true ? 1 : -1);
+        }
     }
 
     public static Integer compareAtoB(Object a, Object b){

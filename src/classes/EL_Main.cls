@@ -6,8 +6,6 @@ public with sharing class EL_Main {
 
     public enum Order {ASCENDING, DESCENDING}
 
-
-
     public static List<String> sort(List<String> strings){
         return sort(strings, Order.ASCENDING);
     }
@@ -89,6 +87,7 @@ public with sharing class EL_Main {
     public class SortingContext{
         public EL_Main.Order direction;
         public String field;
+        public Boolean nullsFirst;
 
         public SortingContext(EL_Main.Order sortDireciton){
             direction = sortDireciton;

@@ -21,6 +21,36 @@ private class EL_Main_Test {
     }
 
     @isTest
+    private static void shouldSortStringsASCnullTest() {
+        //given
+        List<String> unsortedStrings =
+                new List<String>{null, 'c', 'a'};
+
+        //when
+        List<String> result = EL_Main.sort(unsortedStrings);
+
+        //then
+        System.assertEquals('a', result[0]);
+        System.assertEquals('c', result[1]);
+        System.assertEquals(null, result[2]);
+    }
+
+    @isTest
+    private static void shouldSortStringsASCTwoNullTest() {
+        //given
+        List<String> unsortedStrings =
+                new List<String>{null, 'c', null};
+
+        //when
+        List<String> result = EL_Main.sort(unsortedStrings);
+
+        //then
+        System.assertEquals('c', result[0]);
+        System.assertEquals(null, result[1]);
+        System.assertEquals(null, result[2]);
+    }
+
+    @isTest
     private static void shouldLeaveStringUnchanged() {
         //given
         List<String> unsortedStrings =
