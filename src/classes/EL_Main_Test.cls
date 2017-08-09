@@ -130,6 +130,140 @@ private class EL_Main_Test {
         System.assertEquals('c', ((Container) result[2]).name);
     }
 
+    @isTest
+    private static void shouldThrowExceptionWhenCustomObjectDontHaveGivenField() {
+        //given
+        Container a = new Container();
+        a.name = 'a';
+        Container b = new Container();
+        b.name = 'b';
+        Container c = new Container();
+        c.name = 'c';
+        List<Container> unsortedObjects =
+                new List<Container>{
+                        b, c, a
+                };
+        List<EL_Main.SortingContext> sortingContext = new List<EL_Main.SortingContext>();
+        EL_Main.SortingContext context = new EL_Main.SortingContext('name1', EL_Main.Order.ASCENDING);
+        sortingContext.add(context);
+
+        //when
+        try {
+            List<Object> result = EL_Main.sort(unsortedObjects, sortingContext);
+
+            //then
+            System.assert(false, 'Exception was not thrown');
+        } catch (Exception ex){
+            System.assert(ex instanceof EL_Main.InvalidFieldException, 'Wrong exception detected');
+        }
+    }
+
+    @isTest
+    private static void shouldSortCustomObjectDESCByNameField() {
+        //given
+        Container a = new Container();
+        a.name = 'a';
+        Container b = new Container();
+        b.name = 'b';
+        Container c = new Container();
+        c.name = 'c';
+        List<Container> unsortedObjects =
+                new List<Container>{
+                        b, c, a
+                };
+        List<EL_Main.SortingContext> sortingContext = new List<EL_Main.SortingContext>();
+        EL_Main.SortingContext context = new EL_Main.SortingContext('name', EL_Main.Order.DESCENDING);
+        sortingContext.add(context);
+
+        //when
+        List<Object> result = EL_Main.sort(unsortedObjects, sortingContext);
+
+        //then
+        System.assertEquals('c', ((Container) result[0]).name);
+        System.assertEquals('b', ((Container) result[1]).name);
+        System.assertEquals('a', ((Container) result[2]).name);
+    }
+
+    @isTest
+    private static void shouldSortCustomObjectASCByNameFieldOfInnerClass() {
+        //given
+        Container a = new Container();
+        a.name = 'a';
+        Container innerA = new Container();
+        innerA.name = 'a';
+        a.cont = innerA;
+
+        Container b = new Container();
+        b.name = 'b';
+        Container innerB = new Container();
+        innerB.name = 'b';
+        b.cont = innerB;
+
+        Container c = new Container();
+        c.name = 'c';
+        Container innerC = new Container();
+        innerC.name = 'c';
+        c.cont = innerC;
+
+        List<Container> unsortedObjects =
+                new List<Container>{
+                        b, c, a
+                };
+        List<EL_Main.SortingContext> sortingContext = new List<EL_Main.SortingContext>();
+        EL_Main.SortingContext context = new EL_Main.SortingContext('cont.name', EL_Main.Order.ASCENDING);
+        sortingContext.add(context);
+
+        //when
+        List<Object> result = EL_Main.sort(unsortedObjects, sortingContext);
+
+        //then
+        System.assertEquals('a', ((Container) result[0]).name);
+        System.assertEquals('b', ((Container) result[1]).name);
+        System.assertEquals('c', ((Container) result[2]).name);
+    }
+
+    @isTest
+    private static void shouldSortCustomObjectASCByNameFieldOfBaseAndInnerClass() {
+        //given
+        Container a = new Container();
+        a.name = 'a';
+        Container innerA = new Container();
+        innerA.name = 'a';
+        a.cont = innerA;
+
+        Container ab = new Container();
+        ab.name = 'a';
+        Container innerB = new Container();
+        innerB.name = 'b';
+        ab.cont = innerB;
+
+        Container c = new Container();
+        c.name = 'c';
+        Container innerC = new Container();
+        innerC.name = 'c';
+        c.cont = innerC;
+
+        List<Container> unsortedObjects =
+                new List<Container>{
+                        ab, c, a
+                };
+        List<EL_Main.SortingContext> sortingContext = new List<EL_Main.SortingContext>();
+        EL_Main.SortingContext contextLevel1 = new EL_Main.SortingContext('name', EL_Main.Order.ASCENDING);
+        EL_Main.SortingContext contextLevel2 = new EL_Main.SortingContext('cont.name', EL_Main.Order.ASCENDING);
+        sortingContext.add(contextLevel1);
+        sortingContext.add(contextLevel2);
+
+        //when
+        List<Object> result = EL_Main.sort(unsortedObjects, sortingContext);
+
+        //then
+        System.assertEquals('a', ((Container) result[0]).name);
+        System.assertEquals('a', ((Container) result[0]).cont.name);
+        System.assertEquals('a', ((Container) result[1]).name);
+        System.assertEquals('b', ((Container) result[1]).cont.name);
+        System.assertEquals('c', ((Container) result[2]).name);
+    }
+
     public class Container implements EL_Main.ExtListItem{
         public String name;
         public Container cont;

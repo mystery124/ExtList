@@ -74,8 +74,6 @@ public with sharing class EL_Main {
         public List<Object> objects;
         public List<SortingContext> sortingContexts;
 
-        public ListContext(){}
-
         public ListContext(List<Object> records, EL_Main.Order direction){
             objects = records;
             sortingContexts = new List<EL_Main.SortingContext>();
@@ -91,8 +89,6 @@ public with sharing class EL_Main {
     public class SortingContext{
         public EL_Main.Order direction;
         public String field;
-
-        public SortingContext(){}
 
         public SortingContext(EL_Main.Order sortDireciton){
             direction = sortDireciton;
