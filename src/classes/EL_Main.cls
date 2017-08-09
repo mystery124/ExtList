@@ -189,8 +189,8 @@ public with sharing class EL_Main {
             Iterator<SortingContext> contextIterator = sortingContext.iterator();
             while(compareToIndicator == 0 && contextIterator.hasNext()){
                 EL_Main.SortingContext context = (EL_Main.SortingContext) contextIterator.next();
-                Object valueA = getFieldValue(parsedItem, context.field);
-                Object valueB = getFieldValue(itemCompareTo, context.field);
+                Object valueA = getFieldValueIfFieldExists(parsedItem, context.field);
+                Object valueB = getFieldValueIfFieldExists(itemCompareTo, context.field);
                 compareToIndicator = EL_PrimitiveComparator.compareAtoB(valueA, valueB);
                 direction = context.direction;
             }
@@ -198,7 +198,7 @@ public with sharing class EL_Main {
             return addDirectionToIndicator(direction, compareToIndicator);
         }
 
-        private Object getFieldValue(Map<String, Object> record, String fieldPath){
+        private Object getFieldValueIfFieldExists(Map<String, Object> record, String fieldPath){
             String[] fields = fieldPath.split('\\.');
             Iterator<String> fieldIterator = fields.iterator();
             Object value = record;
@@ -208,12 +208,16 @@ public with sharing class EL_Main {
                 if(innerObject.containsKey(field)){
                     value = innerObject.get(field);
                 } else {
-                    EL_Main.InvalidFieldException ex = new InvalidFieldException();
-                    ex.setMessage('Field not found in object: '+field);
-                    throw ex;
+                    throwErrorIfFieldDontExist(field);
                 }
             }
             return value;
+        }
+
+        private void throwErrorIfFieldDontExist(String fieldName){
+            EL_Main.InvalidFieldException ex = new InvalidFieldException();
+            ex.setMessage('Field not found in object: '+fieldName);
+            throw ex;
         }
     }
 
