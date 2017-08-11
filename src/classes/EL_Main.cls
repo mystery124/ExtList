@@ -6,12 +6,25 @@ public with sharing class EL_Main {
 
     public enum Order {ASCENDING, DESCENDING}
 
+    public static final Map<String, String> COMPARABLE_TYPE_BY_OBJ_TYPE = new Map<String, String>{
+            'String' => 'EL_ComparableContainer.StringComparable',
+            'string' => 'EL_ComparableContainer.StringComparable',
+            'STRING' => 'EL_ComparableContainer.StringComparable',
+            'Date'   => 'EL_ComparableContainer.DateComparable',
+            'date'   => 'EL_ComparableContainer.DateComparable',
+            'DATE'   => 'EL_ComparableContainer.DateComparable'
+    };
+
     public static List<String> sort(List<String> strings){
         return sort(strings, Order.ASCENDING);
     }
 
+    public static ListHolder buildListHolder(List<Object> objects, List<SortingContext> context, String objectType){
+        return new ListHolder(objects, context, objectType);
+    }
+
     public static List<String> sort(List<String> strings, Order direction){
-        String comparableTypeName = 'EL_Main.StringComparable';
+        String comparableTypeName = COMPARABLE_TYPE_BY_OBJ_TYPE.get('String');
         ListContext context = new ListContext(strings, direction);
         List<Object> sortedObjects = getSortedObjects(context, comparableTypeName);
         List<Object> sortedStrings = new List<String>();
@@ -25,7 +38,7 @@ public with sharing class EL_Main {
     }
 
     public static List<Date> sort(List<Date> dates, Order direction){
-        String comparableTypeName = 'EL_Main.DateComparable';
+        String comparableTypeName = COMPARABLE_TYPE_BY_OBJ_TYPE.get('Date');
         ListContext context = new ListContext(dates, direction);
         List<Object> sortedObjects = getSortedObjects(context, comparableTypeName);
         List<Object> sortedDates = new List<Date>();
@@ -34,7 +47,7 @@ public with sharing class EL_Main {
     }
 
     public static List<Object> sort(List<ExtListItem> items, List<SortingContext> context){
-        String comparableTypeName = 'EL_Main.CustomComparable';
+        String comparableTypeName = 'EL_ComparableContainer.CustomComparable';
         ListContext lContext = new ListContext(items, context);
         List<Object> sortedItems = getSortedObjects(lContext, comparableTypeName);
         return sortedItems;
@@ -42,27 +55,32 @@ public with sharing class EL_Main {
 
 
     private static List<Object> getSortedObjects(ListContext context, String comparableTypeName){
-        List<ItemWrapper> items = getWrappedAndSortedList(context, comparableTypeName);
+        List<EL_ComparableContainer.ItemWrapper> items = getWrappeddList(context, comparableTypeName);
+        List<EL_ComparableContainer.ItemWrapper> sortedItems = sortList(items);
         List<Object> sortedObjects = extractList(items);
         return sortedObjects;
     }
 
-    private static List<ItemWrapper> getWrappedAndSortedList(ListContext context, String comparableTypeName){
-        List<ItemWrapper> itemWrappers = new List<ItemWrapper>();
+    private static List<EL_ComparableContainer.ItemWrapper> getWrappeddList(ListContext context, String comparableTypeName){
+        List<EL_ComparableContainer.ItemWrapper> itemWrappers = new List<EL_ComparableContainer.ItemWrapper>();
         for(Object obj : context.objects){
             Type comparableType = Type.forName(comparableTypeName);
-            ItemWrapper item = (ItemWrapper) comparableType.newInstance();
+            EL_ComparableContainer.ItemWrapper item = (EL_ComparableContainer.ItemWrapper) comparableType.newInstance();
             item.setItem(obj);
             item.setSortingContext(context.sortingContexts);
             itemWrappers.add(item);
         }
+        return itemWrappers;
+    }
+
+    private static List<EL_ComparableContainer.ItemWrapper> sortList(List<EL_ComparableContainer.ItemWrapper> itemWrappers){
         itemWrappers.sort();
         return itemWrappers;
     }
 
-    private static List<Object> extractList(List<ItemWrapper> itemWrappers){
+    private static List<Object> extractList(List<EL_ComparableContainer.ItemWrapper> itemWrappers){
         List<Object> sortedValues = new List<Object>();
-        for(ItemWrapper item : itemWrappers){
+        for(EL_ComparableContainer.ItemWrapper item : itemWrappers){
             sortedValues.add(item.getItem());
         }
         return sortedValues;
@@ -99,124 +117,34 @@ public with sharing class EL_Main {
         }
     }
 
-    public abstract class ItemWrapper {
-        public abstract void setItem(Object item);
-        public abstract void setSortingContext(List<SortingContext> context);
+    public class ListHolder {
+        private String typeOfHoldObject;
+        private EL_Main.ListContext context;
+        private List<EL_ComparableContainer.ItemWrapper> itemWrappers;
 
-        public abstract Object getItem();
-
-        protected Integer addDirectionToIndicator(Order direction, Integer indicator){
-            return direction == EL_Main.Order.ASCENDING ? indicator : indicator * -1;
-        }
-    }
-
-    public class StringComparable extends EL_Main.ItemWrapper implements Comparable{
-        private String item;
-        private EL_Main.Order direction = EL_Main.Order.ASCENDING;
-
-        public override void setItem(Object item){
-            this.item = (String) item;
-        }
-
-        public override void setSortingContext(List<SortingContext> context){
-            this.direction = context[0].direction;
-        }
-
-        public override Object getItem(){
-            return item;
-        }
-
-        public Integer compareTo(Object compareToObject){
-            ItemWrapper itemWrapperCompareTo = (ItemWrapper) compareToObject;
-            String itemCompareTo = (String) itemWrapperCompareTo.getItem();
-            Integer compareToIndicator = EL_PrimitiveComparator.compareAtoB(item, itemCompareTo);
-            return addDirectionToIndicator(direction, compareToIndicator);
-        }
-    }
-
-    public class DateComparable extends EL_Main.ItemWrapper implements Comparable{
-        private Date item;
-        private EL_Main.Order direction = EL_Main.Order.ASCENDING;
-
-        public override void setItem(Object item){
-            this.item = (Date) item;
-        }
-
-        public override void setSortingContext(List<SortingContext> context){
-            this.direction = context[0].direction;
-        }
-
-        public override Object getItem(){
-            return item;
-        }
-
-        public Integer compareTo(Object compareToObject){
-            ItemWrapper itemWrapperCompareTo = (ItemWrapper) compareToObject;
-            Date itemCompareTo = (Date) itemWrapperCompareTo.getItem();
-            Integer compareToIndicator = EL_PrimitiveComparator.compareAtoB(item, itemCompareTo);
-            return addDirectionToIndicator(direction, compareToIndicator);
-        }
-    }
-
-    public class CustomComparable extends EL_Main.ItemWrapper implements Comparable{
-        private Map<String, Object> parsedItem;
-        private Object originalItem;
-        private List<EL_Main.SortingContext> sortingContext;
-
-        public override void setItem(Object item){
-            parsedItem = (Map<String, Object>) Json.deserializeUntyped(JSON.serialize(item));
-            originalItem = item;
-        }
-
-        public override void setSortingContext(List<SortingContext> context){
-            this.sortingContext = context;
-        }
-
-        public override Object getItem(){
-            return originalItem;
-        }
-
-        public Map<String, Object> getParsedItem(){
-            return parsedItem;
-        }
-
-        public Integer compareTo(Object compareToObject){
-            CustomComparable itemWrapperCompareTo = (CustomComparable) compareToObject;
-            Map<String, Object> itemCompareTo = (Map<String, Object>) itemWrapperCompareTo.getParsedItem();
-            EL_Main.Order direction = EL_Main.Order.ASCENDING;
-            Integer compareToIndicator = 0;
-            Iterator<SortingContext> contextIterator = sortingContext.iterator();
-            while(compareToIndicator == 0 && contextIterator.hasNext()){
-                EL_Main.SortingContext context = (EL_Main.SortingContext) contextIterator.next();
-                Object valueA = getFieldValueIfFieldExists(parsedItem, context.field);
-                Object valueB = getFieldValueIfFieldExists(itemCompareTo, context.field);
-                compareToIndicator = EL_PrimitiveComparator.compareAtoB(valueA, valueB);
-                direction = context.direction;
+        public ListHolder(List<Object> objects, List<EL_Main.SortingContext> sortingContext, String objectType){
+            typeOfHoldObject = objectType;
+            String comparableTypeName = 'EL_ComparableContainer.CustomComparable';
+            if(COMPARABLE_TYPE_BY_OBJ_TYPE.containsKey(objectType)){
+                comparableTypeName = COMPARABLE_TYPE_BY_OBJ_TYPE.get(objectType);
             }
-
-            return addDirectionToIndicator(direction, compareToIndicator);
+            context = new EL_Main.ListContext(objects, sortingContext);
+            itemWrappers = EL_Main.getWrappeddList(context, comparableTypeName);
         }
 
-        private Object getFieldValueIfFieldExists(Map<String, Object> record, String fieldPath){
-            String[] fields = fieldPath.split('\\.');
-            Iterator<String> fieldIterator = fields.iterator();
-            Object value = record;
-            while(fieldIterator.hasNext()){
-                String field = fieldIterator.next();
-                Map<String, Object> innerObject = (Map<String, Object>) value;
-                if(innerObject.containsKey(field)){
-                    value = innerObject.get(field);
-                } else {
-                    throwErrorIfFieldDontExist(field);
-                }
+        public void setSortingContext(List<EL_Main.SortingContext> context){
+            for(EL_ComparableContainer.ItemWrapper itemWrapper : itemWrappers){
+                itemWrapper.setSortingContext(context);
             }
-            return value;
         }
 
-        private void throwErrorIfFieldDontExist(String fieldName){
-            EL_Main.InvalidFieldException ex = new InvalidFieldException();
-            ex.setMessage('Field not found in object: '+fieldName);
-            throw ex;
+        public List<Object> sort(){
+            itemWrappers.sort();
+            List<Object> objects = extractList(itemWrappers);
+            String returnType = 'List<'+typeOfHoldObject+'>';
+            List<Object> castedObjects = (List<Object>) Type.forName(returnType).newInstance();
+            castedObjects.addAll(objects);
+            return castedObjects;
         }
     }
 

@@ -294,6 +294,81 @@ private class EL_Main_Test {
         System.assertEquals('c', ((Container) result[2]).name);
     }
 
+    @isTest
+    private static void shouldSortCustomObjectASCByNameFieldUsingListHolder() {
+        //given
+        Container a = new Container();
+        a.name = 'a';
+        Container b = new Container();
+        b.name = 'b';
+        Container c = new Container();
+        c.name = 'c';
+        List<Container> unsortedObjects =
+                new List<Container>{
+                        b, c, a
+                };
+        List<EL_Main.SortingContext> sortingContext = new List<EL_Main.SortingContext>();
+        EL_Main.SortingContext context = new EL_Main.SortingContext('name', EL_Main.Order.ASCENDING);
+        sortingContext.add(context);
+
+        //when
+        EL_Main.ListHolder holder = EL_Main.buildListHolder(unsortedObjects, sortingContext, (Container.class).getName());
+        List<Object> result = holder.sort();
+
+        //then
+        System.assertEquals('a', ((Container) result[0]).name);
+        System.assertEquals('b', ((Container) result[1]).name);
+        System.assertEquals('c', ((Container) result[2]).name);
+    }
+
+    @isTest
+    private static void shouldChangeContextAndSortUsingListHolder() {
+        //given
+        Container a = new Container();
+        a.name = 'a';
+        Container b = new Container();
+        b.name = 'b';
+        Container c = new Container();
+        c.name = 'c';
+        List<Container> unsortedObjects =
+                new List<Container>{
+                        b, c, a
+                };
+        List<EL_Main.SortingContext> sortingContext = new List<EL_Main.SortingContext>();
+        EL_Main.SortingContext context = new EL_Main.SortingContext('name', EL_Main.Order.ASCENDING);
+        sortingContext.add(context);
+
+        //when
+        EL_Main.ListHolder holder = EL_Main.buildListHolder(unsortedObjects, null, (Container.class).getName());
+        holder.setSortingContext(sortingContext);
+        List<Object> result = holder.sort();
+
+        //then
+        System.assertEquals('a', ((Container) result[0]).name);
+        System.assertEquals('b', ((Container) result[1]).name);
+        System.assertEquals('c', ((Container) result[2]).name);
+    }
+
+    @isTest
+    private static void shouldSortStringsUsingListHolder() {
+        //given
+        List<String> unsortedStrings =
+                new List<String>{'b', 'c', 'a'};
+
+        //when
+        List<EL_Main.SortingContext> sortingContext = new List<EL_Main.SortingContext>();
+        EL_Main.SortingContext context = new EL_Main.SortingContext(EL_Main.Order.ASCENDING);
+        sortingContext.add(context);
+
+        EL_Main.ListHolder holder = EL_Main.buildListHolder(unsortedStrings, sortingContext, (String.class).getName());
+        List<String> result = (List<String>) holder.sort();
+
+        //then
+        System.assertEquals('a', result[0]);
+        System.assertEquals('b', result[1]);
+        System.assertEquals('c', result[2]);
+    }
+
     public class Container implements EL_Main.ExtListItem{
         public String name;
         public Container cont;
