@@ -335,11 +335,15 @@ private class EL_Main_Test {
                         b, c, a
                 };
         List<EL_Main.SortingContext> sortingContext = new List<EL_Main.SortingContext>();
-        EL_Main.SortingContext context = new EL_Main.SortingContext('name', EL_Main.Order.ASCENDING);
+        EL_Main.SortingContext context = new EL_Main.SortingContext('name', EL_Main.Order.DESCENDING);
         sortingContext.add(context);
 
         //when
-        EL_Main.ListHolder holder = EL_Main.buildListHolder(unsortedObjects, null, (Container.class).getName());
+        EL_Main.ListHolder holder = EL_Main.buildListHolder(unsortedObjects, sortingContext, (Container.class).getName());
+        holder.sort();
+        sortingContext.clear();
+        context = new EL_Main.SortingContext('name', EL_Main.Order.ASCENDING);
+        sortingContext.add(context);
         holder.setSortingContext(sortingContext);
         List<Object> result = holder.sort();
 
